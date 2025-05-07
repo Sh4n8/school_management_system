@@ -67,33 +67,42 @@
 <body>
 
   <?php
-  // Declare variables
-  $error = "";
-  $studentnumber = $lastname = $firstname = $middlename = $program = "";
 
+  $studentnumber = $lastname = $firstname = $middlename = $program = "";
+  $error = "";
+
+  // Handle form submission
   if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $studentnumber = trim($_POST['txtstudentnumber']);
     $lastname = trim($_POST['txtlastname']);
     $firstname = trim($_POST['txtfirstname']);
     $middlename = trim($_POST['txtmiddlename']);
     $program = trim($_POST['txtprogram']);
+    $currentYear = date("Y");
+    $yearPrefix = substr($studentnumber, 0, 4);
 
-    // Check if student number already exists
-    $check = $conn->prepare("SELECT fldstudentnumber FROM tblstudent WHERE fldstudentnumber = ?");
-    $check->bind_param("s", $studentnumber);
-    $check->execute();
-    $check->store_result();
-
-    if ($check->num_rows > 0) {
-      $error = "Student number already exists.";
+    if (!preg_match('/^\d{10}$/', $studentnumber)) {
+      $error = "Student number must be exactly 10 digits.";
+    } elseif ((int)$yearPrefix < 2000 || (int)$yearPrefix > (int)$currentYear) {
+      $error = "Invalid year in student number.";
     } else {
-      // Insert new student
-      $stmt = $conn->prepare("INSERT INTO tblstudent (fldstudentnumber, fldlastname, fldfirstname, fldmiddlename, fldprogram) VALUES (?, ?, ?, ?, ?)");
-      $stmt->bind_param("sssss", $studentnumber, $lastname, $firstname, $middlename, $program);
-      $stmt->execute();
+      // Check if student number already exists
+      $check = $conn->prepare("SELECT fldstudentnumber FROM tblstudent WHERE fldstudentnumber = ?");
+      $check->bind_param("s", $studentnumber);
+      $check->execute();
+      $check->store_result();
 
-      header("Location: student.php");
-      exit;
+      if ($check->num_rows > 0) {
+        $error = "Student number already exists.";
+      } else {
+        // Insert new student
+        $stmt = $conn->prepare("INSERT INTO tblstudent (fldstudentnumber, fldlastname, fldfirstname, fldmiddlename, fldprogram) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssss", $studentnumber, $lastname, $firstname, $middlename, $program);
+        $stmt->execute();
+
+        header("Location: student.php");
+        exit;
+      }
     }
   }
   ?>
