@@ -76,8 +76,11 @@
     $title = trim($_POST['course_title']);
     $units = $_POST['units'];
 
-    if (!is_numeric($units) || $units <= 0) {
-      // Optionally handle invalid units
+    // Validate course code format
+    if (!preg_match("/^[A-Z][a-zA-Z0-9]{3,14}$/", $code)) {
+      $error = "Invalid course code format. Must be 4-15 characters, start with uppercase, and contain only letters and numbers.";
+    } elseif (!is_numeric($units) || $units <= 0) {
+      $error = "Units must be a positive number.";
     } else {
       // Check if course code already exists
       $check = $conn->prepare("SELECT fldcoursecode FROM tblcourse WHERE fldcoursecode = ?");
