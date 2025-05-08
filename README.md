@@ -19,7 +19,7 @@
 ## 🖥️ Technologies Used
 Php, MySQL(PhpMyAdmin), HTML/CSS, VsCode
 
-⚙️ Setup Instructions
+## ⚙️ Setup Instructions
 Clone or download the repo
 
 Import database.sql to your phpMyAdmin
@@ -28,7 +28,7 @@ Update DB config in /include/conn.php
 
 Run the project on localhost using XAMPP or similar
 
-##👨‍💻 Author
+## 👨‍💻 Author
 Developed by Shana Czane M. Cruzat
 CS Student – De La Salle Lipa
 
