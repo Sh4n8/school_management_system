@@ -6,6 +6,7 @@
   <meta charset="UTF-8">
   <title>Enroll Student</title>
   <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
@@ -25,10 +26,59 @@
     <main class="main-content">
       <h1>Enroll Student to a Course</h1>
 
+      <?php
+      if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['enroll'])) {
+        $student_id = $_POST['student_id'];
+        $course_code = $_POST['course_code'];
+
+        $check = $conn->prepare("SELECT * FROM tblenrollment WHERE fldstudentnumber = ? AND fldcoursecode = ?");
+        $check->bind_param("ii", $student_id, $course_code);
+        $check->execute();
+        $result = $check->get_result();
+
+        if ($result->num_rows > 0) {
+          echo "<p class='message-error'>Student is already enrolled in this course.</p>";
+        } else {
+          $stmt = $conn->prepare("INSERT INTO tblenrollment (fldstudentnumber, fldcoursecode) VALUES (?, ?)");
+          $stmt->bind_param("ii", $student_id, $course_code);
+
+          if ($stmt->execute()) {
+            echo "<p class='message-success'>Enrollment successful.</p>";
+          } else {
+            echo "<p class='message-error'>Error: " . $stmt->error . "</p>";
+          }
+        }
+      }
+
+      // Handle AJAX-like request inside same file
+      if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['get_courses'])) {
+        $student_id = $_POST['student_id'];
+        $sql = "
+        SELECT fldindex, fldcoursecode, fldcoursetitle
+        FROM tblcourse
+        WHERE fldindex NOT IN (
+          SELECT fldcoursecode FROM tblenrollment WHERE fldstudentnumber = ?
+        )
+        ORDER BY fldcoursetitle
+      ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $options = "<option value=''>-- Select Course --</option>";
+        while ($row = $result->fetch_assoc()) {
+          $options .= "<option value='{$row['fldindex']}'>{$row['fldcoursecode']} - {$row['fldcoursetitle']}</option>";
+        }
+        echo $options;
+        exit;
+      }
+      ?>
+
       <form method="POST" action="">
         <!-- Student Dropdown -->
         <label>Student:
-          <select name="student_id" required>
+          <select name="student_id" id="studentSelect" required>
             <option value="">-- Select Student --</option>
             <?php
             $students = $conn->query("SELECT fldindex, fldstudentnumber, fldfirstname, fldlastname FROM tblstudent ORDER BY fldlastname");
@@ -41,82 +91,51 @@
 
         <!-- Course Dropdown -->
         <label>Course:
-          <select name="course_code" required>
+          <select name="course_code" id="courseSelect" required>
             <option value="">-- Select Course --</option>
-            <?php
-            $courses = $conn->query("SELECT fldindex, fldcoursecode, fldcoursetitle FROM tblcourse ORDER BY fldcoursetitle");
-            while ($c = $courses->fetch_assoc()) {
-              echo "<option value='{$c['fldindex']}'>{$c['fldcoursecode']} - {$c['fldcoursetitle']}</option>";
-            }
-            ?>
           </select>
         </label><br><br>
 
-        <button type="submit">Enroll</button>
+        <button type="submit" name="enroll">Enroll</button>
       </form>
 
+      <h2>Enrolled Students</h2>
       <?php
-      if ($_SERVER["REQUEST_METHOD"] === "POST") {
-        $student_id = $_POST['student_id']; // fldindex from tblstudent
-        $course_code = $_POST['course_code']; // fldindex from tblcourse
-
-        // Prevent duplicate enrollment
-        $check = $conn->prepare("SELECT * FROM tblenrollment WHERE fldstudentnumber = ? AND fldcoursecode = ?");
-        $check->bind_param("ii", $student_id, $course_code);
-        $check->execute();
-        $result = $check->get_result();
-
-        if ($result->num_rows > 0) {
-          echo "<p style='color: red;'>Student is already enrolled in this course.</p>";
-        } else {
-          $stmt = $conn->prepare("INSERT INTO tblenrollment (fldstudentnumber, fldcoursecode) VALUES (?, ?)");
-          $stmt->bind_param("ii", $student_id, $course_code);
-
-          if ($stmt->execute()) {
-            echo "<p style='color: green;'>Enrollment successful.</p>";
-          } else {
-            echo "<p style='color: red;'>Error: " . $stmt->error . "</p>";
-          }
-        }
-      }
-
-      // Show enrolled students
-      echo "<h2>Enrolled Students</h2>";
       $result = $conn->query("
-        SELECT 
-          e.fldstudentnumber,
-          e.fldcoursecode,
-          s.fldstudentnumber AS student_num,
-          s.fldfirstname,
-          s.fldlastname,
-          c.fldcoursecode AS course_code,
-          c.fldcoursetitle
-        FROM tblenrollment e
-        JOIN tblstudent s ON e.fldstudentnumber = s.fldindex
-        JOIN tblcourse c ON e.fldcoursecode = c.fldindex
-        ORDER BY s.fldlastname
-      ");
+      SELECT 
+        e.fldstudentnumber,
+        e.fldcoursecode,
+        s.fldstudentnumber AS student_num,
+        s.fldfirstname,
+        s.fldlastname,
+        c.fldcoursecode AS course_code,
+        c.fldcoursetitle
+      FROM tblenrollment e
+      JOIN tblstudent s ON e.fldstudentnumber = s.fldindex
+      JOIN tblcourse c ON e.fldcoursecode = c.fldindex
+      ORDER BY s.fldlastname
+    ");
 
       if ($result->num_rows > 0) {
         echo "<table border='1' cellpadding='10'>
-                <tr>
-                  <th>Student Number</th>
-                  <th>Student Name</th>
-                  <th>Course Code</th>
-                  <th>Course Description</th>
-                  <th>Action</th>
-                </tr>";
+              <tr>
+                <th>Student Number</th>
+                <th>Student Name</th>
+                <th>Course Code</th>
+                <th>Course Description</th>
+                <th>Action</th>
+              </tr>";
         while ($row = $result->fetch_assoc()) {
           echo "<tr>
-                  <td>{$row['student_num']}</td>
-                  <td>{$row['fldlastname']}, {$row['fldfirstname']}</td>
-                  <td>{$row['course_code']}</td>
-                  <td>{$row['fldcoursetitle']}</td>
-                  <td>
-                    <a class='action-btn action-edit' href='update.php?vid={$row['fldstudentnumber']}'>Edit</a>
-                    <a class='action-btn action-delete' href='delete.php?vid={$row['fldstudentnumber']}' onclick=\"return confirm('Are you sure?');\">Delete</a>
-                  </td>
-                </tr>";
+                <td>{$row['student_num']}</td>
+                <td>{$row['fldlastname']}, {$row['fldfirstname']}</td>
+                <td>{$row['course_code']}</td>
+                <td>{$row['fldcoursetitle']}</td>
+                <td>
+                  <a class='action-btn action-edit' href='update.php?vid={$row['fldstudentnumber']}&cid={$row['fldcoursecode']}'>Edit</a>
+                  <a class='action-btn action-delete' href='delete.php?vid={$row['fldstudentnumber']}&cid={$row['fldcoursecode']}' onclick=\"return confirm('Are you sure?');\">Delete</a>
+                </td>
+              </tr>";
         }
         echo "</table>";
       } else {
@@ -125,9 +144,27 @@
       ?>
     </main>
   </div>
+
+  <script>
+    $(document).ready(function() {
+      $('#studentSelect').on('change', function() {
+        const studentId = $(this).val();
+        $('#courseSelect').html('<option>Loading...</option>');
+
+        $.post('enroll.php', {
+          student_id: studentId,
+          get_courses: true
+        }, function(data) {
+          $('#courseSelect').html(data);
+        });
+      });
+    });
+  </script>
 </body>
 
 </html>
+
+
 
 <style>
   body {
