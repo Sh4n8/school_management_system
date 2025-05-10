@@ -1,24 +1,46 @@
 <?php
 require("../include/conn.php");
 
-$vcode = $_GET['vid'] ?? '';
-
-if (!$vcode) {
-  echo "No enrollment selected.";
+if (!isset($_GET['vid']) || !isset($_GET['cid'])) {
+  echo "Invalid request.";
   exit;
 }
 
-// Fetch course details
-$sql = "SELECT * FROM tblenrollment WHERE fldenrollmentid = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $vcode);
+$student_id = $_GET['vid'];
+$course_id = $_GET['cid'];
+
+// Fetch student and course info
+$stmt = $conn->prepare("
+  SELECT 
+    s.fldstudentnumber, s.fldfirstname, s.fldlastname,
+    c.fldcoursecode, c.fldcoursetitle
+  FROM tblenrollment e
+  JOIN tblstudent s ON e.fldstudentnumber = s.fldindex
+  JOIN tblcourse c ON e.fldcoursecode = c.fldindex
+  WHERE e.fldstudentnumber = ? AND e.fldcoursecode = ?
+");
+$stmt->bind_param("ii", $student_id, $course_id);
 $stmt->execute();
 $result = $stmt->get_result();
-$enrollmment = $result->fetch_assoc();
 
-if (!$enrollment) {
-  echo "Course not found.";
+if ($result->num_rows === 0) {
+  echo "Enrollment not found.";
   exit;
+}
+
+$data = $result->fetch_assoc();
+
+// If confirmed, delete the enrollment
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_delete'])) {
+  $delete = $conn->prepare("DELETE FROM tblenrollment WHERE fldstudentnumber = ? AND fldcoursecode = ?");
+  $delete->bind_param("ii", $student_id, $course_id);
+
+  if ($delete->execute()) {
+    header("Location: enroll.php?msg=deleted");
+    exit;
+  } else {
+    echo "Failed to delete enrollment: " . $delete->error;
+  }
 }
 ?>
 
@@ -27,12 +49,12 @@ if (!$enrollment) {
 
 <head>
   <meta charset="UTF-8">
-  <title>Confirm Course Deletion</title>
+  <title>Confirm Enrollment Deletion</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #f8f9fa;
-      padding: 50px;
+      background-color: #f0f4f8;
+      padding: 60px;
       text-align: center;
     }
 
@@ -41,8 +63,9 @@ if (!$enrollment) {
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       display: inline-block;
-      padding: 30px 40px;
+      padding: 40px 50px;
       text-align: left;
+      max-width: 600px;
     }
 
     .confirm-box h2 {
@@ -52,6 +75,7 @@ if (!$enrollment) {
 
     .details {
       margin: 20px 0;
+      font-size: 16px;
     }
 
     .details p {
@@ -59,8 +83,8 @@ if (!$enrollment) {
     }
 
     .btn {
-      padding: 10px 18px;
-      border-radius: 5px;
+      padding: 10px 20px;
+      border-radius: 6px;
       border: none;
       cursor: pointer;
       font-weight: bold;
@@ -74,13 +98,17 @@ if (!$enrollment) {
       color: white;
     }
 
+    .btn-delete:hover {
+      background-color: #a41e1e;
+    }
+
     .btn-cancel {
-      background-color: #888;
+      background-color: #00703c;
       color: white;
     }
 
-    .btn:hover {
-      opacity: 0.9;
+    .btn-cancel:hover {
+      background-color: #00572e;
     }
   </style>
 </head>
@@ -91,13 +119,16 @@ if (!$enrollment) {
     <p>Are you sure you want to delete this enrollment?</p>
 
     <div class="details">
-      <p><strong>Course Code:</strong> <?= htmlspecialchars($course['fldcoursecode']) ?></p>
-      <p><strong>Course Title:</strong> <?= htmlspecialchars($course['fldcoursetitle']) ?></p>
-      <p><strong>Units:</strong> <?= htmlspecialchars($course['fldunits']) ?></p>
+      <p><strong>Student Number:</strong> <?= htmlspecialchars($data['fldstudentnumber']) ?></p>
+      <p><strong>Student Name:</strong> <?= htmlspecialchars($data['fldlastname'] . ', ' . $data['fldfirstname']) ?></p>
+      <p><strong>Course Code:</strong> <?= htmlspecialchars($data['fldcoursecode']) ?></p>
+      <p><strong>Course Title:</strong> <?= htmlspecialchars($data['fldcoursetitle']) ?></p>
     </div>
 
-    <a class="btn btn-delete" href="delete-save.php?vid=<?= urlencode($course['fldcoursecode']) ?>">Yes, Delete</a>
-    <a class="btn btn-cancel" href="course.php">Cancel</a>
+    <form method="POST">
+      <button type="submit" name="confirm_delete" class="btn btn-delete">Yes, Delete</button>
+      <a href="enroll.php" class="btn btn-cancel">Cancel</a>
+    </form>
   </div>
 </body>
 
