@@ -16,8 +16,6 @@
                 <li><a href="student/student.php">Student Records</a></li>
                 <li><a href="course/course.php">Course Records</a></li>
                 <li><a href="enrollments/enroll.php">Enroll Student</a></li>
-                <li><a href="enrollments/student_subject.php">Student's Subjects</a></li>
-                <li><a href="enrollments/subject_student.php">Subject's Students</a></li>
             </ul>
         </aside>
         <main class="main-content">
