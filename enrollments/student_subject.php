@@ -46,7 +46,6 @@ $fullname = "{$student['fldlastname']}, {$student['fldfirstname']}";
       color: white;
       width: 220px;
       padding: 20px;
-      height: 100vh;
     }
 
     .sidebar h2 {
@@ -123,6 +122,11 @@ $fullname = "{$student['fldlastname']}, {$student['fldfirstname']}";
     .action-btn:hover {
       background-color: #00572e;
     }
+
+    .total-units {
+      font-weight: bold;
+      margin-top: 15px;
+    }
   </style>
 </head>
 
@@ -139,6 +143,7 @@ $fullname = "{$student['fldlastname']}, {$student['fldfirstname']}";
     </aside>
 
     <main class="main-content">
+      <a class="action-btn" href="enroll.php">← Back to Enrollment</a>
       <h1>Subjects Enrolled by Student</h1>
 
       <h2><?php echo htmlspecialchars($student['fldstudentnumber']) . " - " . htmlspecialchars($fullname); ?></h2>
@@ -155,6 +160,8 @@ $fullname = "{$student['fldlastname']}, {$student['fldfirstname']}";
       $stmt2->execute();
       $subjectsResult = $stmt2->get_result();
 
+      $totalUnits = 0;
+
       if ($subjectsResult->num_rows > 0) {
         echo "<table>
                 <tr>
@@ -163,6 +170,7 @@ $fullname = "{$student['fldlastname']}, {$student['fldfirstname']}";
                   <th>Units</th>
                 </tr>";
         while ($subject = $subjectsResult->fetch_assoc()) {
+          $totalUnits += (int)$subject['fldunits'];
           echo "<tr>
                   <td>" . htmlspecialchars($subject['fldcoursecode']) . "</td>
                   <td>" . htmlspecialchars($subject['fldcoursetitle']) . "</td>
@@ -170,6 +178,7 @@ $fullname = "{$student['fldlastname']}, {$student['fldfirstname']}";
                 </tr>";
         }
         echo "</table>";
+        echo "<p class='total-units'>Total Units: " . $totalUnits . "</p>";
       } else {
         echo "<p>No subjects enrolled.</p>";
       }
