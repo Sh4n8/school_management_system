@@ -37,7 +37,7 @@ if (isset($_POST['submit'])) {
 
     // Validation
     if (!preg_match("/^[A-Z][a-zA-Z0-9]{3,14}$/", $code)) {
-        $error = "Invalid course code format. Use 4–15 characters, starting with a capital letter.";
+        $error = "Invalid course code format.";
     } elseif (!is_numeric($units) || $units <= 0) {
         $error = "Units must be a positive number.";
     } elseif (strlen($title) < 4) {
