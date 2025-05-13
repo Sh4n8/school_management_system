@@ -147,6 +147,14 @@ unset($_SESSION['success_message']);
     .action-delete:hover {
       background-color: #a41e1e;
     }
+
+    .action-view {
+      background-color: #1976d2;
+    }
+
+    .action-view:hover {
+      background-color: #125ea3;
+    }
   </style>
 </head>
 
@@ -159,8 +167,6 @@ unset($_SESSION['success_message']);
         <li><a href="student.php">Student Records</a></li>
         <li><a href="../course/course.php">Course Records</a></li>
         <li><a href="../enrollments/enroll.php">Enroll Student</a></li>
-        <li><a href="../enrollments/student_subject.php">Student's Subjects</a></li>
-        <li><a href="../enrollments/subject_student.php">Subject's Students</a></li>
       </ul>
     </aside>
 
@@ -239,6 +245,7 @@ unset($_SESSION['success_message']);
               <td>
                 <a class="action-btn action-edit" href="update.php?vid=<?php echo $row['fldstudentnumber']; ?>">Edit</a>
                 <a class="action-btn action-delete" href="delete.php?vid=<?php echo $row['fldstudentnumber']; ?>">Delete</a>
+                <a class="action-btn action-view" href="../enrollments/student_subject.php?vid=<?php echo $row['fldstudentnumber']; ?>">View Subjects</a>
               </td>
             </tr>
         <?php

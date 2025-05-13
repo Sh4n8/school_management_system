@@ -1,6 +1,8 @@
-<?php require("../include/conn.php"); ?>
 <?php
+require("../include/conn.php");
 session_start();
+
+// Get and then clear any success message stored in session
 $successMsg = $_SESSION['success_message'] ?? '';
 unset($_SESSION['success_message']);
 ?>
@@ -11,7 +13,6 @@ unset($_SESSION['success_message']);
 <head>
   <meta charset="UTF-8">
   <title>Course Records</title>
-
   <style>
     body {
       margin: 0;
@@ -147,12 +148,12 @@ unset($_SESSION['success_message']);
       background-color: #a41e1e;
     }
 
-    .alert-success {
-      background-color: #d4edda;
-      color: #155724;
-      padding: 12px 20px;
-      border-radius: 5px;
-      margin-bottom: 20px;
+    .action-view {
+      background-color: #1976d2;
+    }
+
+    .action-view:hover {
+      background-color: #125ea3;
     }
   </style>
 </head>
@@ -166,8 +167,6 @@ unset($_SESSION['success_message']);
         <li><a href="../student/student.php">Student Records</a></li>
         <li><a href="course.php">Course Records</a></li>
         <li><a href="../enrollments/enroll.php">Enroll Student</a></li>
-        <li><a href="../enrollments/student_subject.php">Student's Subjects</a></li>
-        <li><a href="../enrollments/subject_student.php">Subject's Students</a></li>
       </ul>
     </aside>
 
@@ -175,7 +174,7 @@ unset($_SESSION['success_message']);
       <h1>Course Records</h1>
 
       <?php if ($successMsg): ?>
-        <div class="alert-success">
+        <div style="background-color: #d4edda; color: #155724; padding: 12px 20px; border-radius: 5px; margin-bottom: 20px;">
           <?= htmlspecialchars($successMsg) ?>
         </div>
       <?php endif; ?>
@@ -199,24 +198,22 @@ unset($_SESSION['success_message']);
         <?php
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-        if (isset($_GET['search'])) {
-          if ($search === '' || $search === '0') {
-            $result = false;
-          } else {
-            $sql = "SELECT * FROM tblcourse 
-                    WHERE fldcoursecode LIKE ? 
-                       OR fldcoursetitle LIKE ? 
-                       OR CAST(fldunits AS CHAR) LIKE ? 
-                    ORDER BY fldindex ASC";
-            $stmt = $conn->prepare($sql);
-            $searchTerm = "%$search%";
-            $stmt->bind_param("sss", $searchTerm, $searchTerm, $searchTerm);
-            $stmt->execute();
-            $result = $stmt->get_result();
-          }
-        } else {
+        if (isset($_GET['search']) && $search !== '' && $search !== '0') {
+          $sql = "SELECT * FROM tblcourse 
+                  WHERE fldcoursecode LIKE ? 
+                     OR fldcoursetitle LIKE ? 
+                     OR CAST(fldunits AS CHAR) LIKE ? 
+                  ORDER BY fldindex ASC";
+          $stmt = $conn->prepare($sql);
+          $searchTerm = "%$search%";
+          $stmt->bind_param("sss", $searchTerm, $searchTerm, $searchTerm);
+          $stmt->execute();
+          $result = $stmt->get_result();
+        } else if (!isset($_GET['search'])) {
           $sql = "SELECT * FROM tblcourse ORDER BY fldindex ASC";
           $result = $conn->query($sql);
+        } else {
+          $result = false;
         }
 
         $i = 1;
@@ -230,6 +227,7 @@ unset($_SESSION['success_message']);
             echo "<td>
                     <a class='action-btn action-edit' href='update.php?vid=" . urlencode($row['fldcoursecode']) . "'>Edit</a>
                     <a class='action-btn action-delete' href='delete.php?vid=" . urlencode($row['fldcoursecode']) . "'>Delete</a>
+                    <a class='action-btn action-view' href='../enrollments/subject_student.php?vid=" . urlencode($row['fldcoursecode']) . "'>View Students</a>
                   </td>";
             echo "</tr>";
             $i++;
