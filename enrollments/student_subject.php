@@ -1,12 +1,35 @@
-<?php require("../include/conn.php"); ?>
+<?php
+require("../include/conn.php");
+
+if (!isset($_GET['vid']) || empty($_GET['vid'])) {
+  echo "Invalid request.";
+  exit;
+}
+
+$studentNumber = $_GET['vid'];
+
+// Get student details
+$stmt = $conn->prepare("SELECT fldstudentnumber, fldlastname, fldfirstname FROM tblstudent WHERE fldstudentnumber = ?");
+$stmt->bind_param("s", $studentNumber);
+$stmt->execute();
+$studentResult = $stmt->get_result();
+
+if ($studentResult->num_rows === 0) {
+  echo "Student not found.";
+  exit;
+}
+
+$student = $studentResult->fetch_assoc();
+$fullname = "{$student['fldlastname']}, {$student['fldfirstname']}";
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
-  <title>Student's Subjects</title>
+  <title>Subjects Enrolled by Student</title>
   <style>
-    /* Same styling as your existing dashboard */
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
@@ -67,6 +90,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 20px;
     }
 
     table,
@@ -88,12 +112,12 @@
     .action-btn {
       background-color: #00693e;
       color: white;
-      padding: 6px 12px;
+      padding: 8px 16px;
       border-radius: 4px;
       text-decoration: none;
-      margin-right: 5px;
       display: inline-block;
-      font-size: 14px;
+      margin-bottom: 20px;
+      font-weight: bold;
     }
 
     .action-btn:hover {
@@ -111,60 +135,43 @@
         <li><a href="../student/student.php">Student Records</a></li>
         <li><a href="../course/course.php">Course Records</a></li>
         <li><a href="enroll.php">Enroll Student</a></li>
-        <li><a href="../enrollments/student_subject.php">Student's Subjects</a></li>
-        <li><a href="../enrollments/subject_student.php">Subject's Students</a></li>
       </ul>
     </aside>
 
     <main class="main-content">
       <h1>Subjects Enrolled by Student</h1>
 
-      <form method="GET" action="">
-        <label>Select Student:</label>
-        <select name="student_id" onchange="this.form.submit()" required>
-          <option value="">-- Choose a Student --</option>
-          <?php
-          $students = $conn->query("SELECT fldindex, fldstudentnumber, fldlastname, fldfirstname FROM tblstudent ORDER BY fldlastname");
-          while ($s = $students->fetch_assoc()) {
-            $selected = (isset($_GET['student_id']) && $_GET['student_id'] == $s['fldindex']) ? "selected" : "";
-            echo "<option value='{$s['fldindex']}' $selected>{$s['fldstudentnumber']} - {$s['fldlastname']}, {$s['fldfirstname']}</option>";
-          }
-          ?>
-        </select>
-      </form>
+      <h2><?php echo htmlspecialchars($student['fldstudentnumber']) . " - " . htmlspecialchars($fullname); ?></h2>
 
       <?php
-      if (isset($_GET['student_id']) && $_GET['student_id'] !== '') {
-        $student_id = $_GET['student_id'];
+      // Get enrolled subjects
+      $stmt2 = $conn->prepare("
+        SELECT c.fldcoursecode, c.fldcoursetitle, c.fldunits
+        FROM tblenrollment e
+        JOIN tblcourse c ON c.fldindex = e.fldcoursecode
+        WHERE e.fldstudentnumber = ?
+      ");
+      $stmt2->bind_param("s", $studentNumber);
+      $stmt2->execute();
+      $subjectsResult = $stmt2->get_result();
 
-        $studentInfo = $conn->query("SELECT fldstudentnumber, fldfirstname, fldlastname FROM tblstudent WHERE fldindex = $student_id")->fetch_assoc();
-        echo "<h2>{$studentInfo['fldstudentnumber']} - {$studentInfo['fldlastname']}, {$studentInfo['fldfirstname']}</h2>";
-
-        $result = $conn->query("
-          SELECT c.fldcoursecode, c.fldcoursetitle, c.fldunits
-          FROM tblenrollment e
-          JOIN tblcourse c ON e.fldcoursecode = c.fldindex
-          WHERE e.fldstudentnumber = $student_id
-        ");
-
-        if ($result->num_rows > 0) {
-          echo "<table>
-                  <tr>
-                    <th>Course Code</th>
-                    <th>Course Title</th>
-                    <th>Units</th>
-                  </tr>";
-          while ($row = $result->fetch_assoc()) {
-            echo "<tr>
-                    <td>{$row['fldcoursecode']}</td>
-                    <td>{$row['fldcoursetitle']}</td>
-                    <td>{$row['fldunits']}</td>
-                  </tr>";
-          }
-          echo "</table>";
-        } else {
-          echo "<p>No courses enrolled yet.</p>";
+      if ($subjectsResult->num_rows > 0) {
+        echo "<table>
+                <tr>
+                  <th>Course Code</th>
+                  <th>Course Title</th>
+                  <th>Units</th>
+                </tr>";
+        while ($subject = $subjectsResult->fetch_assoc()) {
+          echo "<tr>
+                  <td>" . htmlspecialchars($subject['fldcoursecode']) . "</td>
+                  <td>" . htmlspecialchars($subject['fldcoursetitle']) . "</td>
+                  <td>" . htmlspecialchars($subject['fldunits']) . "</td>
+                </tr>";
         }
+        echo "</table>";
+      } else {
+        echo "<p>No subjects enrolled.</p>";
       }
       ?>
     </main>
