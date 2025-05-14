@@ -1,10 +1,44 @@
-<?php require("../include/conn.php"); ?>
+<?php
+require("../../include/conn.php");
+
+if (!isset($_GET['vid'])) {
+  echo "No course specified.";
+  exit;
+}
+
+$course_id = $_GET['vid'];
+
+// Get course details
+$course_stmt = $conn->prepare("SELECT fldcoursecode, fldcoursetitle FROM tblcourse WHERE fldcoursecode = ?");
+$course_stmt->bind_param("s", $course_id);
+$course_stmt->execute();
+$course_result = $course_stmt->get_result();
+
+if ($course_result->num_rows === 0) {
+  echo "Course not found.";
+  exit;
+}
+
+$course = $course_result->fetch_assoc();
+
+// Get students enrolled in the course
+$student_stmt = $conn->prepare("
+  SELECT s.fldstudentnumber, s.fldlastname, s.fldfirstname, s.fldmiddlename, s.fldprogram
+  FROM tblenrollment e
+  JOIN tblstudent s ON e.fldstudentnumber = s.fldindex
+  WHERE e.fldcoursecode = ?
+");
+$student_stmt->bind_param("s", $course_id);
+$student_stmt->execute();
+$student_result = $student_stmt->get_result();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
-  <title>Subject's Students</title>
+  <title>Students Enrolled in <?= htmlspecialchars($course['fldcoursetitle']) ?></title>
   <style>
     body {
       margin: 0;
@@ -22,6 +56,7 @@
       color: white;
       width: 220px;
       padding: 20px;
+      height: 100vh;
     }
 
     .sidebar h2 {
@@ -32,6 +67,7 @@
     .sidebar ul {
       list-style: none;
       padding: 0;
+      margin: 0;
     }
 
     .sidebar li {
@@ -61,6 +97,26 @@
       overflow-y: auto;
     }
 
+    .back-button {
+      display: inline-block;
+      margin-bottom: 20px;
+      background-color: #00703c;
+      color: white;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .back-button:hover {
+      background-color: #00572e;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -76,6 +132,26 @@
     th {
       background-color: #f1f1f1;
     }
+
+    .action-btn {
+      padding: 6px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      margin-right: 5px;
+      display: inline-block;
+      font-size: 14px;
+      color: white;
+      font-weight: bold;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .action-delete {
+      background-color: #c62828;
+    }
+
+    .action-delete:hover {
+      background-color: #a41e1e;
+    }
   </style>
 </head>
 
@@ -87,62 +163,48 @@
         <li><a href="../index.php">Home</a></li>
         <li><a href="../student/student.php">Student Records</a></li>
         <li><a href="../course/course.php">Course Records</a></li>
-        <li><a href="enroll.php">Enroll Student</a></li>
-
+        <li><a href="../enroll.php">Enroll Student</a></li>
       </ul>
     </aside>
 
     <main class="main-content">
-      <h1>Students Enrolled in a Subject</h1>
+      <a href="../../course/course.php" class="back-button">← Back to Courses</a>
+      <h1>Students Enrolled in: <?= htmlspecialchars($course['fldcoursetitle']) ?> (<?= htmlspecialchars($course['fldcoursecode']) ?>)</h1>
 
-      <form method="GET" action="">
-        <label for="subject">Select Subject:</label>
-        <select name="course_id" id="subject" onchange="this.form.submit()" required>
-          <option value="">-- Choose a Subject --</option>
-          <?php
-          $courses = $conn->query("SELECT fldindex, fldcoursecode, fldcoursetitle FROM tblcourse ORDER BY fldcoursetitle");
-          while ($c = $courses->fetch_assoc()) {
-            $selected = (isset($_GET['course_id']) && $_GET['course_id'] == $c['fldindex']) ? "selected" : "";
-            echo "<option value='{$c['fldindex']}' $selected>{$c['fldcoursecode']} - {$c['fldcoursetitle']}</option>";
-          }
-          ?>
-        </select>
-      </form>
-
-      <?php
-      if (isset($_GET['course_id']) && $_GET['course_id'] !== '') {
-        $course_id = $_GET['course_id'];
-
-        $courseInfo = $conn->query("SELECT fldcoursecode, fldcoursetitle FROM tblcourse WHERE fldindex = $course_id")->fetch_assoc();
-        echo "<h2>{$courseInfo['fldcoursecode']} - {$courseInfo['fldcoursetitle']}</h2>";
-
-        $result = $conn->query("
-          SELECT s.fldstudentnumber, s.fldlastname, s.fldfirstname
-          FROM tblenrollment e
-          JOIN tblstudent s ON e.fldstudentnumber = s.fldindex
-          WHERE e.fldcoursecode = $course_id
-        ");
-
-        if ($result->num_rows > 0) {
-          echo "<table>
-                  <tr>
-                    <th>Student Number</th>
-                    <th>Last Name</th>
-                    <th>First Name</th>
-                  </tr>";
-          while ($row = $result->fetch_assoc()) {
-            echo "<tr>
-                    <td>{$row['fldstudentnumber']}</td>
-                    <td>{$row['fldlastname']}</td>
-                    <td>{$row['fldfirstname']}</td>
-                  </tr>";
-          }
-          echo "</table>";
-        } else {
-          echo "<p>No students are enrolled in this subject.</p>";
-        }
-      }
-      ?>
+      <?php if ($student_result->num_rows > 0): ?>
+        <table>
+          <thead>
+            <tr>
+              <th>Student Number</th>
+              <th>Last Name</th>
+              <th>First Name</th>
+              <th>Middle Name</th>
+              <th>Program</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php while ($row = $student_result->fetch_assoc()): ?>
+              <tr>
+                <td><?= htmlspecialchars($row['fldstudentnumber']) ?></td>
+                <td><?= htmlspecialchars($row['fldlastname']) ?></td>
+                <td><?= htmlspecialchars($row['fldfirstname']) ?></td>
+                <td><?= htmlspecialchars($row['fldmiddlename']) ?></td>
+                <td><?= htmlspecialchars($row['fldprogram']) ?></td>
+                <td>
+                  <a class="action-btn action-delete"
+                    href="delete.php?student=<?= urlencode($row['fldstudentnumber']) ?>&course=<?= urlencode($course_id) ?>"
+                    onclick="return confirm('Are you sure you want to remove this student from the course?');">
+                    Delete
+                  </a>
+                </td>
+              </tr>
+            <?php endwhile; ?>
+          </tbody>
+        </table>
+      <?php else: ?>
+        <p>No students enrolled in this course.</p>
+      <?php endif; ?>
     </main>
   </div>
 </body>
