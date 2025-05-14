@@ -219,17 +219,19 @@ unset($_SESSION['success_message']);
         $i = 1;
         if ($result && $result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
-            echo "<tr>";
-            echo "<td>{$i}</td>";
-            echo "<td>" . htmlspecialchars($row['fldcoursecode']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['fldcoursetitle']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['fldunits']) . "</td>";
-            echo "<td>
-                    <a class='action-btn action-edit' href='update.php?vid=" . urlencode($row['fldcoursecode']) . "'>Edit</a>
-                    <a class='action-btn action-delete' href='delete.php?vid=" . urlencode($row['fldcoursecode']) . "'>Delete</a>
-                    <a class='action-btn action-view' href='../enrollments/subject_student.php?vid=" . urlencode($row['fldcoursecode']) . "'>View Students</a>
-                  </td>";
-            echo "</tr>";
+        ?>
+            <tr>
+              <td><?= $i ?></td>
+              <td><?= htmlspecialchars($row['fldcoursecode']) ?></td>
+              <td><?= htmlspecialchars($row['fldcoursetitle']) ?></td>
+              <td><?= htmlspecialchars($row['fldunits']) ?></td>
+              <td>
+                <a class="action-btn action-edit" href="update.php?vid=<?= urlencode($row['fldcoursecode']) ?>">Edit</a>
+                <a class="action-btn action-delete" href="delete.php?vid=<?= urlencode($row['fldcoursecode']) ?>">Delete</a>
+                <a class="action-btn action-view" href="../enrollments/subject_student/subject_student.php?vid=<?= urlencode($row['fldcoursecode']) ?>">View Students</a>
+              </td>
+            </tr>
+        <?php
             $i++;
           }
         } else {
