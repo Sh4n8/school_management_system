@@ -228,7 +228,7 @@ unset($_SESSION['success_message']);
               <td>
                 <a class="action-btn action-edit" href="update.php?vid=<?= urlencode($row['fldcoursecode']) ?>">Edit</a>
                 <a class="action-btn action-delete" href="delete.php?vid=<?= urlencode($row['fldcoursecode']) ?>">Delete</a>
-                <a class="action-btn action-view" href="../enrollments/subject_student/subject_student.php?vid=<?= urlencode($row['fldcoursecode']) ?>">View Students</a>
+                <a class="action-btn action-view" href="../enrollments/subject_student/subject_student.php?vid=<?= urlencode($row['fldindex']) ?>">View Students</a>
               </td>
             </tr>
         <?php
