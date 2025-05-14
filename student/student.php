@@ -245,7 +245,7 @@ unset($_SESSION['success_message']);
               <td>
                 <a class="action-btn action-edit" href="update.php?vid=<?php echo $row['fldstudentnumber']; ?>">Edit</a>
                 <a class="action-btn action-delete" href="delete.php?vid=<?php echo $row['fldstudentnumber']; ?>">Delete</a>
-                <a class="action-btn action-view" href="../enrollments/student_subject.php?vid=<?php echo $row['fldstudentnumber']; ?>">View Subjects</a>
+                <a class="action-btn action-view" href="../enrollments/student_subject/student_subject.php?vid=<?php echo $row['fldstudentnumber']; ?>">View Subjects</a>
               </td>
             </tr>
         <?php
