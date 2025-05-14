@@ -8,9 +8,9 @@ if (!isset($_GET['vid'])) {
 
 $course_id = $_GET['vid'];
 
-// Get course details
-$course_stmt = $conn->prepare("SELECT fldcoursecode, fldcoursetitle FROM tblcourse WHERE fldcoursecode = ?");
-$course_stmt->bind_param("s", $course_id);
+// Get course details using fldindex (correct)
+$course_stmt = $conn->prepare("SELECT fldcoursecode, fldcoursetitle FROM tblcourse WHERE fldindex = ?");
+$course_stmt->bind_param("i", $course_id);
 $course_stmt->execute();
 $course_result = $course_stmt->get_result();
 
@@ -21,14 +21,14 @@ if ($course_result->num_rows === 0) {
 
 $course = $course_result->fetch_assoc();
 
-// Get students enrolled in the course
+// Get students enrolled in the course using fldcoursecode in tblenrollment
 $student_stmt = $conn->prepare("
   SELECT s.fldstudentnumber, s.fldlastname, s.fldfirstname, s.fldmiddlename, s.fldprogram
   FROM tblenrollment e
   JOIN tblstudent s ON e.fldstudentnumber = s.fldindex
   WHERE e.fldcoursecode = ?
 ");
-$student_stmt->bind_param("s", $course_id);
+$student_stmt->bind_param("i", $course_id);
 $student_stmt->execute();
 $student_result = $student_stmt->get_result();
 ?>
@@ -40,6 +40,7 @@ $student_result = $student_stmt->get_result();
   <meta charset="UTF-8">
   <title>Students Enrolled in <?= htmlspecialchars($course['fldcoursetitle']) ?></title>
   <style>
+    /* Your same styles here — unchanged */
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
@@ -160,10 +161,10 @@ $student_result = $student_stmt->get_result();
     <aside class="sidebar">
       <h2>Dashboard</h2>
       <ul>
-        <li><a href="../index.php">Home</a></li>
-        <li><a href="../student/student.php">Student Records</a></li>
-        <li><a href="../course/course.php">Course Records</a></li>
-        <li><a href="../enroll.php">Enroll Student</a></li>
+        <li><a href="../../index.php">Home</a></li>
+        <li><a href="../../student/student.php">Student Records</a></li>
+        <li><a href="../../course/course.php">Course Records</a></li>
+        <li><a href="../../enrollments/enroll.php">Enroll Student</a></li>
       </ul>
     </aside>
 
