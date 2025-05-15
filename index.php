@@ -23,18 +23,21 @@
             <p>Main dashboard eyy</p>
             <div style="display: flex; gap: 20px; text-align: center;">
                 <div style="display: flex; flex-direction: column; align-items: center;">
-                    <p>ASU NI SHAN</p>
-                    <img src="images/ellie.jpg" alt="dawg ni shan" width="300" height="400">
+                    <p style="margin: 5px 0;">ASU NI SHAN</p>
+                    <p style="margin: 0 0 10px 0;">ellie</p>
+                    <img src="images/ellie.jpg" alt="dawg ni shan" width="300" height="400" style="border-radius: 35px;">
                 </div>
 
                 <div style="display: flex; flex-direction: column; align-items: center;">
-                    <p>PUSA NI NINO</p>
-                    <img src="images/chunky.jpg" alt="pusa ni nino" width="300" height="400">
+                    <p style="margin: 5px 0;">PUSA NI NINO</p>
+                    <p style="margin: 0 0 10px 0;">chunky</p>
+                    <img src="images/chunky.jpg" alt="pusa ni nino" width="300" height="400" style="border-radius: 35px;">
                 </div>
 
                 <div style="display: flex; flex-direction: column; align-items: center;">
-                    <p>PUSA NI KAT</p>
-                    <img src="images/mickey.jpg" alt="pusa ni kat" width="300" height="400">
+                    <p style="margin: 5px 0;">PUSA NI KAT</p>
+                    <p style="margin: 0 0 10px 0;">mickey</p>
+                    <img src="images/mickey.jpg" alt="pusa ni kat" width="300" height="400" style="border-radius: 35px;">
                 </div>
             </div>
 
