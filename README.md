@@ -17,7 +17,7 @@
 ✅ Built using PHP, MySQL (phpMyAdmin), HTML, CSS
 
 ## 🖥️ Technologies Used
-Php, MySQL(PhpMyAdmin), HTML/CSS, VsCode
+Php, MySQL,PhpMyAdmin, Xampp, HTML/CSS
 
 ## ⚙️ Setup Instructions
 Clone or download the repo
