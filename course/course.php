@@ -226,7 +226,7 @@ unset($_SESSION['success_message']);
               <td><?= htmlspecialchars($row['fldcoursetitle']) ?></td>
               <td><?= htmlspecialchars($row['fldunits']) ?></td>
               <td>
-                <a class="action-btn action-edit" href="update.php?vid=<?= urlencode($row['fldcoursecode']) ?>">Edit</a>
+                <a class="action-btn action-edit" href="update.php?vid=<?= urlencode($row['fldcoursecode']) ?>">Edits</a>
                 <a class="action-btn action-delete" href="delete.php?vid=<?= urlencode($row['fldcoursecode']) ?>">Delete</a>
                 <a class="action-btn action-view" href="../enrollments/subject_student/subject_student.php?vid=<?= urlencode($row['fldindex']) ?>">View Students</a>
               </td>
