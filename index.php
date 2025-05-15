@@ -20,7 +20,9 @@
         </aside>
         <main class="main-content">
             <h1>Welcome to the Student Management System</h1>
-            <p>Main dashboard eyyy</p>
+            <p>Main dashboard eyy</p>
+            <p> ito oh pusa</p>
+            <img src="images/cat.jpg" alt="A cat" width="500" height="700">
         </main>
     </div>
 </body>
