@@ -21,8 +21,23 @@
         <main class="main-content">
             <h1>Welcome to the Student Management System</h1>
             <p>Main dashboard eyy</p>
-            <p> ito oh pusa</p>
-            <img src="images/cat.jpg" alt="A cat" width="500" height="700">
+            <div style="display: flex; gap: 20px; text-align: center;">
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <p>ASU NI SHAN</p>
+                    <img src="images/ellie.jpg" alt="dawg ni shan" width="300" height="400">
+                </div>
+
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <p>PUSA NI NINO</p>
+                    <img src="images/chunky.jpg" alt="pusa ni nino" width="300" height="400">
+                </div>
+
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <p>PUSA NI KAT</p>
+                    <img src="images/mickey.jpg" alt="pusa ni kat" width="300" height="400">
+                </div>
+            </div>
+
         </main>
     </div>
 </body>
