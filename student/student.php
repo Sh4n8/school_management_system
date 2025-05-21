@@ -184,6 +184,7 @@ unset($_SESSION['success_message']);
         <button type="submit" class="form-button">Search</button>
         <a href="student.php" class="form-button">Show All Records</a>
         <a href="add.php" class="form-button">Add New Student</a>
+        <a href="download.php" class="form-button" target="_blank">Download</a>
       </form>
 
       <table>
