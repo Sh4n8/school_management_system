@@ -160,6 +160,47 @@ $course_result = $course_stmt->get_result();
     .action-delete:hover {
       background-color: #a41e1e;
     }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    form input[type="text"] {
+      padding: 6px;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .form-button {
+      background-color: #00703c;
+      color: white;
+      padding: 6px 12px;
+      text-decoration: none;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-block;
+      font-size: 14px;
+      margin-right: 5px;
+    }
+
+    .form-button:hover {
+      background-color: #00572e;
+    }
+
+    .student-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .student-header p {
+      margin: 0;
+    }
   </style>
 </head>
 
@@ -171,16 +212,22 @@ $course_result = $course_stmt->get_result();
         <li><a href="../../index.php">Home</a></li>
         <li><a href="../../student/student.php">Student Records</a></li>
         <li><a href="../../course/course.php">Course Records</a></li>
-        <li><a href="../../enroll.php">Enroll Student</a></li>
+        <li><a href="../enroll.php">Enroll Student</a></li>
       </ul>
     </aside>
 
     <main class="main-content">
       <a href="../../student/student.php" class="back-button">← Back to Students</a>
+
       <h1>Subjects Enrolled</h1>
+
       <div class="student-header">
-        <?= htmlspecialchars($student['fldstudentnumber']) ?> - <?= htmlspecialchars($student['fldlastname'] . ', ' . $student['fldfirstname']) ?>
+        <p>
+          <?= htmlspecialchars($student['fldstudentnumber']) ?> - <?= htmlspecialchars($student['fldlastname'] . ', ' . $student['fldfirstname']) ?>
+        </p>
+        <a href="download.php?vid=<?= urlencode($student['fldstudentnumber']) ?>" class="form-button" target="_blank">Download PDF</a>
       </div>
+
 
       <?php if ($course_result->num_rows > 0): ?>
         <table>
