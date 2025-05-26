@@ -40,7 +40,6 @@ $student_result = $student_stmt->get_result();
   <meta charset="UTF-8">
   <title>Students Enrolled in <?= htmlspecialchars($course['fldcoursetitle']) ?></title>
   <style>
-    /* Your same styles here — unchanged */
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
@@ -118,6 +117,12 @@ $student_result = $student_stmt->get_result();
       font-size: 24px;
     }
 
+    .student-header {
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -153,6 +158,47 @@ $student_result = $student_stmt->get_result();
     .action-delete:hover {
       background-color: #a41e1e;
     }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    form input[type="text"] {
+      padding: 6px;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .form-button {
+      background-color: #00703c;
+      color: white;
+      padding: 6px 12px;
+      text-decoration: none;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-block;
+      font-size: 14px;
+      margin-right: 5px;
+    }
+
+    .form-button:hover {
+      background-color: #00572e;
+    }
+
+    .subject-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .subject-header p {
+      margin: 0;
+    }
   </style>
 </head>
 
@@ -170,43 +216,50 @@ $student_result = $student_stmt->get_result();
 
     <main class="main-content">
       <a href="../../course/course.php" class="back-button">← Back to Courses</a>
-      <h1>Students Enrolled in: <?= htmlspecialchars($course['fldcoursetitle']) ?> (<?= htmlspecialchars($course['fldcoursecode']) ?>)</h1>
 
-      <?php if ($student_result->num_rows > 0): ?>
-        <table>
-          <thead>
-            <tr>
-              <th>Student Number</th>
-              <th>Last Name</th>
-              <th>First Name</th>
-              <th>Middle Name</th>
-              <th>Program</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php while ($row = $student_result->fetch_assoc()): ?>
-              <tr>
-                <td><?= htmlspecialchars($row['fldstudentnumber']) ?></td>
-                <td><?= htmlspecialchars($row['fldlastname']) ?></td>
-                <td><?= htmlspecialchars($row['fldfirstname']) ?></td>
-                <td><?= htmlspecialchars($row['fldmiddlename']) ?></td>
-                <td><?= htmlspecialchars($row['fldprogram']) ?></td>
-                <td>
-                  <a class="action-btn action-delete"
-                    href="delete.php?student=<?= urlencode($row['fldstudentnumber']) ?>&course=<?= urlencode($course_id) ?>"
-                    onclick="return confirm('Are you sure you want to remove this student from the course?');">
-                    Delete
-                  </a>
-                </td>
-              </tr>
-            <?php endwhile; ?>
-          </tbody>
-        </table>
-      <?php else: ?>
-        <p>No students enrolled in this course.</p>
-      <?php endif; ?>
-    </main>
+      <h1>Students Enrolled</h1>
+      <div class="subject-header">
+      <p>
+        <?= htmlspecialchars($course['fldcoursetitle']) ?> (<?= htmlspecialchars($course['fldcoursecode']) ?>)
+      </p>
+      <a href="download.php?vid=<?= urlencode($course['fldcoursecode']) ?>" class="form-button">Download PDF</a>
+  </div>
+
+  <?php if ($student_result->num_rows > 0): ?>
+    <table>
+      <thead>
+        <tr>
+          <th>Student Number</th>
+          <th>Last Name</th>
+          <th>First Name</th>
+          <th>Middle Name</th>
+          <th>Program</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php while ($row = $student_result->fetch_assoc()): ?>
+          <tr>
+            <td><?= htmlspecialchars($row['fldstudentnumber']) ?></td>
+            <td><?= htmlspecialchars($row['fldlastname']) ?></td>
+            <td><?= htmlspecialchars($row['fldfirstname']) ?></td>
+            <td><?= htmlspecialchars($row['fldmiddlename']) ?></td>
+            <td><?= htmlspecialchars($row['fldprogram']) ?></td>
+            <td>
+              <a class="action-btn action-delete"
+                href="delete.php?student=<?= urlencode($row['fldstudentnumber']) ?>&course=<?= urlencode($course_id) ?>"
+                onclick="return confirm('Are you sure?');">
+                Delete
+              </a>
+            </td>
+          </tr>
+        <?php endwhile; ?>
+      </tbody>
+    </table>
+  <?php else: ?>
+    <p>No students enrolled in this course.</p>
+  <?php endif; ?>
+  </main>
   </div>
 </body>
 
