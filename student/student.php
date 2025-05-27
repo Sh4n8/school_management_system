@@ -166,7 +166,7 @@ unset($_SESSION['success_message']);
         <li><a href="../index.php">Home</a></li>
         <li><a href="student.php">Student Records</a></li>
         <li><a href="../course/course.php">Course Records</a></li>
-        <li><a href="../enrollments/enroll.php">Enroll Student</a></li>
+        <li><a href="../enrollments/enrollment.php">Enroll Student</a></li>
       </ul>
     </aside>
 

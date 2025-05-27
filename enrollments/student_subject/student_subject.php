@@ -212,7 +212,7 @@ $course_result = $course_stmt->get_result();
         <li><a href="../../index.php">Home</a></li>
         <li><a href="../../student/student.php">Student Records</a></li>
         <li><a href="../../course/course.php">Course Records</a></li>
-        <li><a href="../enroll.php">Enroll Student</a></li>
+        <li><a href="../../enrollments/enrollment.php">Enroll Student</a></li>
       </ul>
     </aside>
 
